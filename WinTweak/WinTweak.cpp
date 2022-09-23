@@ -87,18 +87,18 @@ int download_file(string link, string filename) {
 }
 
 int active_windows(string key, string kms) {
-	system("cscript //nologo slmgr.vbs /upk");
-	system("cscript //nologo slmgr.vbs /cpky");
+	system("cscript //nologo %windir%/system32/slmgr.vbs /upk");
+	system("cscript //nologo %windir%/system32/slmgr.vbs /cpky");
 	{
-		string PATH_temp = "cscript //nologo slmgr.vbs /ipk " + key;
+		string PATH_temp = "cscript //nologo %windir%/system32/slmgr.vbs /ipk " + key;
 		strcpy_s(PATH_EXEC, PATH_temp.c_str());
 		system(PATH_EXEC);
 	}
 	{
-		string PATH_temp = "cscript //nologo slmgr.vbs /skms " + kms;
+		string PATH_temp = "cscript //nologo %windir%/system32/slmgr.vbs /skms " + kms;
 		strcpy_s(PATH_EXEC, PATH_temp.c_str());
 		system(PATH_EXEC);
-		bool active = system("cscript //nologo slmgr.vbs /ato");
+		bool active = system("cscript //nologo %windir%/system32/slmgr.vbs /ato");
 		return active;
 	}
 }
@@ -253,7 +253,9 @@ void set_console_size() {
 
 void activate_windows() {
     {
-		active_windows("W269N-WFGWX-YVC9B-4J6C9-T83GX", "");
+		clear();
+		active_windows("W269N-WFGWX-YVC9B-4J6C9-T83GX", "kms9.MSGuides.com:1688");
+		pause_on_exit();
 	}
 }
 
