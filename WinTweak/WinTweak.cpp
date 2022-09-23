@@ -117,43 +117,57 @@ int test_ping(string link) {
 
 int activate_windows(int id, string win, int count) {
 	{
-		clear();
-		cout << "Test KMS Server...\n";
-		for (int i = 1; i < 5; i++) {
-			string a;
-			if (id == 7) {
-				a = kms7[i];
-			}
-			else if (id == 8) {
-				a = kms8[i];
-			}
-			else if (id == 10) {
-				a = kms10[i];
-			}
-			if (test_ping(a) == 0) {
-				count = i;
-				break;
-			}
-		}
-		if (count == 0) {
-			cout << "All server KMS is die!\n";
-			pause_on_exit();
-			return 1;
-		}
-		else {
+		string khanh;
+		cout << "\n\nDo you want to activate it? [Y/N]: ";
+		cin >> khanh;
+		if (khanh == "Y" || khanh == "y") {
 			clear();
-			bool return_code;
+			cout << "Test KMS Server...\n";
+			string a; int b;
 			if (id == 7) {
-				return_code = active_windows(windows[win], kms7[count]);
+				b = kms7.size() + 1;
 			}
 			else if (id == 8) {
-				return_code = active_windows(windows[win], kms8[count]);
+				b = kms8.size() + 1;
 			}
 			else if (id == 10) {
-				return_code = active_windows(windows[win], kms10[count]);
+				b = kms10.size() + 1;
 			}
-			pause_on_exit();
-			return return_code;
+			for (int i = 1; i < b; i++) {
+				if (id == 7) {
+					a = kms7[i];
+				}
+				else if (id == 8) {
+					a = kms8[i];
+				}
+				else if (id == 10) {
+					a = kms10[i];
+				}
+				if (test_ping(a) == 0) {
+					count = i;
+					break;
+				}
+			}
+			if (count == 0) {
+				cout << "All server KMS is die!\n";
+				pause_on_exit();
+				return 1;
+			}
+			else {
+				clear();
+				bool return_code;
+				if (id == 7) {
+					return_code = active_windows(windows[win], kms7[count]);
+				}
+				else if (id == 8) {
+					return_code = active_windows(windows[win], kms8[count]);
+				}
+				else if (id == 10) {
+					return_code = active_windows(windows[win], kms10[count]);
+				}
+				pause_on_exit();
+				return return_code;
+			}
 		}
 	}
 }
@@ -229,14 +243,10 @@ windows:
 	windows["win10enterN"] = "DPH2V-TTNVB-4X9Q3-TJR4H-KHJW4";
 	windows["win10edu"] = "NW6C2-QMPVW-D7KKK-3GKT6-VCFB2";
 	windows["win10eduN"] = "2WH4N-8QGBV-H22JP-CT43Q-MDWWJ";
-	windows["win10edu"] = "WNMTR-4C88C-JK8YV-HQ7T2-76DF9";
-	windows["win10edu"] = "2F77B-TNFGY-69QQF-B8YKP-D69TJ";
-	windows["win10edu"] = "DCPHK-NFMTC-H88MJ-PFHPY-QJ4BJ";
-	windows["win10edu"] = "QFFDN-GRT3P-VKWWX-X7T3R-8B639";
-	windows["win10enter2015ltsc"] = "NW6C2-QMPVW-D7KKK-3GKT6-VCFB2";
-	windows["win10enter2015ltscN"] = "NW6C2-QMPVW-D7KKK-3GKT6-VCFB2";
-	windows["win10enter2016ltsc"] = "NW6C2-QMPVW-D7KKK-3GKT6-VCFB2";
-	windows["win10enter2016ltscN"] = "NW6C2-QMPVW-D7KKK-3GKT6-VCFB2";
+	windows["win10enter2015ltsb"] = "WNMTR-4C88C-JK8YV-HQ7T2-76DF9";
+	windows["win10enter2015ltsbN"] = "2F77B-TNFGY-69QQF-B8YKP-D69TJ";
+	windows["win10enter2016ltsb"] = "DCPHK-NFMTC-H88MJ-PFHPY-QJ4BJ";
+	windows["win10enter2016ltsbN"] = "QFFDN-GRT3P-VKWWX-X7T3R-8B639";
 	windows["win10prowork"] = "NRG8B-VKK3Q-CXVCJ-9G2XF-6Q84J";
 	windows["win10proworkN"] = "9FNHH-K3HBT-3W4TD-6383H-6XYWF";
 kms7:
@@ -314,13 +324,13 @@ main_menu:
 activate_win:
 	clear();
 	khanh_main();
-	cout << "\n 1. Windows 7\n 2. Windows 8\n 3. Windows 8.1\n 4. Windows 10/11\n 0. Exit\n\n Your choose: ";
+	cout << "\n 1. Windows 7\n 2. Windows 8\n 3. Windows 8.1\n 4. Windows 10/11\n 0. Back\n\n Your choose: ";
 	cin >> khanh;
 	switch (khanh) {
 	case 1:
 		clear();
 		khanh_main();
-		cout << "\n 1. Windows 7 Professional\n 2. Windows 7 Professional N\n 3. Windows 7 Professional E\n 4. Windows 7 Enterprise\n 5. Windows 7 Enterprise N\n 6. Windows 7 Enterprise E\n 0. Exit\n\n Your choose: ";
+		cout << "\n 1. Windows 7 Professional\n 2. Windows 7 Professional N\n 3. Windows 7 Professional E\n 4. Windows 7 Enterprise\n 5. Windows 7 Enterprise N\n 6. Windows 7 Enterprise E\n 0. Back\n\n Your choose: ";
 		cin >> khanh;
 		switch (khanh) {
 		case 1:
@@ -344,13 +354,88 @@ activate_win:
 		}
 		goto activate_win;
 	case 2:
-		activate_windows(8, "win8", 0);
+		clear();
+		khanh_main();
+		cout << "\n 1. Windows 8 Professional\n 2. Windows 8 Professional N\n 3. Windows 8 Enterprise\n 4. Windows 8 Enterprise N\n 0. Back\n\n Your choose: ";
+		cin >> khanh;
+		switch (khanh) {
+		case 1:
+			activate_windows(8, "win8pro", 0);
+			goto activate_win;
+		case 2:
+			activate_windows(8, "win8proN", 0);
+			goto activate_win;
+		case 3:
+			activate_windows(8, "win8enter", 0);
+			goto activate_win;
+		case 4:
+			activate_windows(8, "win8enterN", 0);
+			goto activate_win;
+		}
 		goto activate_win;
 	case 3:
-		activate_windows(8, "win81", 0);
+		clear();
+		khanh_main();
+		cout << "\n 1. Windows 8.1 Professional\n 2. Windows 8.1 Professional N\n 3. Windows 8.1 Enterprise\n 4. Windows 8.1 Enterprise N\n 0. Back\n\n Your choose: ";
+		cin >> khanh;
+		switch (khanh) {
+		case 1:
+			activate_windows(8, "win81pro", 0);
+			goto activate_win;
+		case 2:
+			activate_windows(8, "win81proN", 0);
+			goto activate_win;
+		case 3:
+			activate_windows(8, "win81enter", 0);
+			goto activate_win;
+		case 4:
+			activate_windows(8, "win81enterN", 0);
+			goto activate_win;
+		}
 		goto activate_win;
 	case 4:
-		activate_windows(8, "win10", 0);
+		clear();
+		khanh_main();
+		cout << "\n 1. Windows 10 Professional\n 2. Windows 10 Professional N\n 3. Windows 10 Enterprise\n 4. Windows 10 Enterprise N\n 5. Windows 10 Education\n 6. Windows 10 Education N\n 7. Windows 10 Enterprise 2015 LTSB\n 8. Windows 10 Enterprise 2015 LTSB N\n 9. Windows 10 Enterprise 2016 LTSB\n 10. Windows 10 Enterprise 2016 LTSB N\n 11. Windows 10 Professional Workstation\n 12. Windows 10 Professional Workstation N\n 0. Back\n\n Your choose: ";
+		cin >> khanh;
+		switch (khanh) {
+		case 1:
+			activate_windows(10, "win10pro", 0);
+			goto activate_win;
+		case 2:
+			activate_windows(10, "win10proN", 0);
+			goto activate_win;
+		case 3:
+			activate_windows(10, "win10enter", 0);
+			goto activate_win;
+		case 4:
+			activate_windows(10, "win10enterN", 0);
+			goto activate_win;
+		case 5:
+			activate_windows(10, "win10edu", 0);
+			goto activate_win;
+		case 6:
+			activate_windows(10, "win10eduN", 0);
+			goto activate_win;
+		case 7:
+			activate_windows(10, "win10enter2015ltsb", 0);
+			goto activate_win;
+		case 8:
+			activate_windows(10, "win10enter2015ltsbN", 0);
+			goto activate_win;
+		case 9:
+			activate_windows(10, "win10enter2016ltsb", 0);
+			goto activate_win;
+		case 10:
+			activate_windows(10, "win10enter2016ltsbN", 0);
+			goto activate_win;
+		case 11:
+			activate_windows(10, "win10prowork", 0);
+			goto activate_win;
+		case 12:
+			activate_windows(10, "win10proworkN", 0);
+			goto activate_win;
+		}
 		goto activate_win;
 	case 0:
 		goto main_menu;
@@ -360,7 +445,7 @@ activate_win:
 framework:
 	clear();
 	khanh_main();
-	cout << "\n 1. Framework 4.8\n 0. Exit\n\n Your choose: ";
+	cout << "\n 1. Framework 4.8\n 0. Back\n\n Your choose: ";
 	cin >> khanh;
 	switch (khanh) {
 		case 1:
@@ -374,7 +459,7 @@ framework:
 office:
 	clear();
 	khanh_main();
-	cout << "\n 1. Office ProPlus LTSC 2021\n 2. Office 365\n 0. Exit\n\n Your choose: ";
+	cout << "\n 1. Office ProPlus LTSC 2021\n 2. Office 365\n 0. Back\n\n Your choose: ";
 	cin >> khanh;
 	switch (khanh) {
 		case 1:
