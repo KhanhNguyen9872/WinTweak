@@ -21,10 +21,6 @@ void clearTrash();
 void install_vcredist();
 void clear_tmp();
 void set_console_size();
-void install_directx();
-void install_framework48();
-void install_office_proplus_ltsc_2021();
-void activate_windows();
 
 std::wstring ExePath() {
 	TCHAR buffer[MAX_PATH] = { 0 };
@@ -103,6 +99,34 @@ int active_windows(string key, string kms) {
 	}
 }
 
+int activate_windows(string win) {
+	{
+		clear();
+		active_windows("W269N-WFGWX-YVC9B-4J6C9-T83GX", "kms9.MSGuides.com:1688");
+		pause_on_exit();
+	}
+}
+
+int download_and_install(bool isclear, bool iscontinue, string projectname, string link, string filename, string exec) {
+	if (check_exist(PATH_str + "\\tools\\wget.exe") != 0) {
+		cout << "wget not found";
+		pause_on_exit();
+	}
+	else {
+		if (isclear == 0) {
+			clear();
+			clear_tmp();
+		}
+		cout << "\n Downloading " << projectname << "...\n";
+		download_file(link, filename);
+		cout << "\n Installing " << projectname << "... ";
+		exec_file(exec);
+		printf("Done\n");
+		if (iscontinue != 0) {
+			pause_on_exit();
+		}
+	}
+}
 
 int main(){
 check:
@@ -174,7 +198,7 @@ main_menu:
 			goto main_menu;
 		case 5:
 			if (network == 1) {
-				install_directx();
+				download_and_install(0, 1, "DirectX", "https://tinyurl.com/55824f4a", "directx.exe", "directx.exe");
 			}
 			goto main_menu;
 		case 6:
@@ -199,16 +223,16 @@ activate_win:
 	cin >> khanh;
 	switch (khanh) {
 	case 1:
-		activate_windows();
+		activate_windows("win7");
 		goto activate_win;
 	case 2:
-		activate_windows();
+		activate_windows("win8");
 		goto activate_win;
 	case 3:
-		activate_windows();
+		activate_windows("win81");
 		goto activate_win;
 	case 4:
-		activate_windows();
+		activate_windows("win10");
 		goto activate_win;
 	case 0:
 		goto main_menu;
@@ -222,7 +246,7 @@ framework:
 	cin >> khanh;
 	switch (khanh) {
 		case 1:
-			install_framework48();
+			download_and_install(0, 1, "Framework 4.8", "https://tinyurl.com/2vb2fudw", "Framework48.exe", "Framework48.exe /q /norestart");
 			goto framework;
 		case 0:
 			goto main_menu;
@@ -232,11 +256,14 @@ framework:
 office:
 	clear();
 	cout << "Menu by KhanhNguyen9872\n";
-	cout << "\n 1. Office ProPlus LTSC 2021\n 0. Exit\n\n Your choose: ";
+	cout << "\n 1. Office ProPlus LTSC 2021\n 2. Office 365\n 0. Exit\n\n Your choose: ";
 	cin >> khanh;
 	switch (khanh) {
 		case 1:
-			install_office_proplus_ltsc_2021();
+			download_and_install(0, 1, "Office ProPlus LTSC 2021", "https://tinyurl.com/22kbfheb", "OfficePPLTSC2021.exe", "OfficePPLTSC2021.exe");
+			goto office;
+		case 2:
+			download_and_install(0, 1, "Office 365", "https://tinyurl.com/38w39nj4", "Office365.exe", "Office365.exe");
 			goto office;
 		case 0:
 			goto main_menu;
@@ -248,14 +275,6 @@ office:
 void set_console_size() {
     {
 		system("mode con: cols=65 lines=9001 && color 71");
-	}
-}
-
-void activate_windows() {
-    {
-		clear();
-		active_windows("W269N-WFGWX-YVC9B-4J6C9-T83GX", "kms9.MSGuides.com:1688");
-		pause_on_exit();
 	}
 }
 
@@ -278,74 +297,17 @@ void clear_tmp() {
 	}
 }
 
-void install_office_proplus_ltsc_2021() {
-	if (check_exist(PATH_str + "\\tools\\wget.exe") != 0) {
-		cout << "wget not found";
-		pause_on_exit();
-	}
-	else {
-		clear();
-		clear_tmp();
-		printf("\n Downloading Office ProPlus LTSC 2021...\n");
-		download_file("https://tinyurl.com/bdr9pbaa", "OfficeProPlusLTSC2021.exe");
-		printf("\n Installing Office ProPlus LTSC 2021... ");
-		exec_file("OfficeProPlusLTSC2021.exe");
-		printf("Done\n");
-		pause_on_exit();
-	}
-}
-
-void install_framework48() {
-	clear();
-	clear_tmp();
-	printf ("\n Downloading Framework 4.8...\n");
-	download_file("https://tinyurl.com/2vb2fudw", "Framework48.exe");
-	printf ("\n Installing Framework 4.8... ");
-	exec_file("Framework48.exe /q /norestart");
-	printf ("Done\n");
-	pause_on_exit();
-}
-
-void install_directx() {
-	clear();
-	clear_tmp();
-	printf ("\n Downloading DirectX...\n");
-	download_file("https://tinyurl.com/55824f4a", "DirectX.exe");
-	printf ("\n Installing DirectX... ");
-	exec_file("DirectX.exe");
-	printf ("\nInstallation is running in the background\n");
-	pause_on_exit();
-}
-
 void install_vcredist() {
-	clear();
-	clear_tmp();
-	printf ("\n Downloading vcredist x86...\n");
-	download_file("https://tinyurl.com/4b75en7n", "vcredist_x86.exe");
-	printf ("\n Installing vcredist x86... ");
-	exec_file("vcredist_x86.exe /install /quiet /norestart");
-	printf ("Done\n");
+	download_and_install(0, 0, "vcredist x86", "https://tinyurl.com/4b75en7n", "vcredist_x86.exe", "vcredist_x86.exe /install /quiet /norestart");
 	if (arch == "x86_64" || arch == "ARM64") {
 		printf ("============");
-		printf ("\n Downloading vcredist x64...\n");
-		download_file("https://tinyurl.com/bdzea7wf", "vcredist_x64.exe");
-		printf ("\n Installing vcredist x64... ");
-		exec_file("vcredist_x64.exe /install /quiet /norestart");
-		printf ("Done\n");
+		download_and_install(1, 0, "vcredist x64", "https://tinyurl.com/bdzea7wf", "vcredist_x64.exe", "vcredist_x64.exe /install /quiet /norestart");
 	}
 	if (arch == "ARM64") {
 		printf ("============");
-		printf ("\n Downloading vcredist ARM...\n");
-		download_file("https://tinyurl.com/wbzj2sc7", "vcredist_ARM.exe");
-		printf ("\n Installing vcredist ARM... ");
-		exec_file("vcredist_ARM.exe /install /quiet /norestart");
-		printf ("Done\n");
+		download_and_install(1, 0, "vcredist ARM", "https://tinyurl.com/wbzj2sc7", "vcredist_ARM.exe", "vcredist_ARM.exe /install /quiet /norestart");
 		printf ("============");
-		printf ("\n Downloading vcredist ARM64...\n");
-		download_file("https://tinyurl.com/ys649mw9", "vcredist_ARM64.exe");
-		printf ("\n Installing vcredist ARM64... ");
-		exec_file("vcredist_ARM64.exe /install /quiet /norestart");
-		printf ("Done\n");
+		download_and_install(1, 0, "vcredist ARM64", "https://tinyurl.com/ys649mw9", "vcredist_ARM64.exe", "vcredist_ARM64.exe /install /quiet /norestart");
 	}
 	cout << "============\n Install completed!";
 	clear_tmp();
