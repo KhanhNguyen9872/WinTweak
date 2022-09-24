@@ -24,6 +24,7 @@ void install_vcredist();
 void clear_tmp();
 void set_console_size();
 void khanh_main();
+void check_activate();
 
 std::wstring ExePath() {
 	TCHAR buffer[MAX_PATH] = { 0 };
@@ -45,11 +46,19 @@ char PATH[255];
 char PATH_EXEC[255];
 string arch;
 string test1;
+string slmgr = "cscript //nologo %windir%/system32/slmgr.vbs";
 bool is64 = stat("C:\\Windows\\SysWOW64", &info);
 bool isarm64 = stat("C:\\Program Files (Arm)", &info);
 bool network;
 
-int exec(string command) {
+string read_file(string filename)
+{
+	stringstream buffer;
+	buffer << ifstream(filename).rdbuf();
+	return buffer.str();
+}
+
+bool exec(string command) {
 	{
 		string PATH_temp = command;
 		strcpy_s(PATH_EXEC, PATH_temp.c_str());
@@ -58,7 +67,15 @@ int exec(string command) {
 	}
 }
 
-int exec_file(string filename) {
+string exec_output(string command) {
+	{
+		exec(command + " > " + PATH_str + "\\tmp\\tmp.output 2>&1");
+		string output_str = read_file(PATH_str + "\\tmp\\tmp.output");
+		return output_str;
+	}
+}
+
+bool exec_file(string filename) {
     {
 		string PATH_temp = "cd " + PATH_str + "\\tmp && " + filename;
 		strcpy_s(PATH_EXEC, PATH_temp.c_str());
@@ -72,7 +89,7 @@ bool fileExists(const std::string& file) {
 	return (stat(file.c_str(), &buf) == 0);
 }
 
-int check_exist(string pathf) {
+bool check_exist(string pathf) {
 	{
 		string PATH_temp = pathf;
 		strcpy_s(PATH_EXEC, PATH_temp.c_str());
@@ -81,41 +98,42 @@ int check_exist(string pathf) {
 	}
 }
 
-int download_file(string link, string filename) {
+bool download_file(string link, string filename) {
 	{
-		string PATH_temp = "cd " + PATH_str + "\\tmp && .\\..\\tools\\wget.exe --no-check-certificate -q --show-progress -O " + filename + " " + link;
-		strcpy_s(PATH_EXEC, PATH_temp.c_str());
-		bool return_code = system(PATH_EXEC);
+		if (check_exist(PATH_str + "\\tools\\wget.exe") != 0 || check_exist(PATH_str + "\\tools\\libeay32.dll") != 0 || check_exist(PATH_str + "\\tools\\libiconv2.dll") != 0 || check_exist(PATH_str + "\\tools\\libintl3.dll") != 0 || check_exist(PATH_str + "\\tools\\libssl32.dll") != 0) {
+			cout << "wget or library not found";
+			pause_on_exit();
+			return 1;
+		}
+		else {
+			string PATH_temp = "cd " + PATH_str + "\\tmp && .\\..\\tools\\wget.exe --no-check-certificate -q --show-progress -O " + filename + " " + link;
+			strcpy_s(PATH_EXEC, PATH_temp.c_str());
+			bool return_code = system(PATH_EXEC);
+			return return_code;
+		}
+	}
+}
+
+bool active_windows(string key, string kms) {
+	cout << "\n Activating Windows...\n\n";
+	exec(slmgr + " /upk > NUL 2>&1");
+	exec(slmgr + " /cpky > NUL 2>&1");
+	exec(slmgr + " /ipk " + key + " > NUL 2>&1");
+	exec(slmgr + " /skms " + kms + " > NUL 2 > &1");
+	{
+		bool return_code = exec(slmgr + " / ato");
 		return return_code;
 	}
 }
 
-int active_windows(string key, string kms) {
-	cout << "\n Activating Windows...\n\n";
-	system("cscript //nologo %windir%/system32/slmgr.vbs /upk > NUL 2>&1");
-	system("cscript //nologo %windir%/system32/slmgr.vbs /cpky > NUL 2>&1");
-	{
-		string PATH_temp = "cscript //nologo %windir%/system32/slmgr.vbs /ipk " + key + " > NUL 2>&1";
-		strcpy_s(PATH_EXEC, PATH_temp.c_str());
-		system(PATH_EXEC);
-	}
-	{
-		string PATH_temp = "cscript //nologo %windir%/system32/slmgr.vbs /skms " + kms + " > NUL 2>&1";
-		strcpy_s(PATH_EXEC, PATH_temp.c_str());
-		system(PATH_EXEC);
-		bool active = system("cscript //nologo %windir%/system32/slmgr.vbs /ato");
-		return active;
-	}
-}
-
-int test_ping(string link) {
+bool test_ping(string link) {
 	{
 		bool return_code = exec("ping -n 1 " + link + " > NUL 2>&1");
 		return return_code;
 	}
 }
 
-int activate_windows(int id, string win, int count) {
+bool activate_windows(int id, string win, int count) {
 	{
 		string khanh;
 		cout << "\n\nDo you want to activate it? [Y/N]: ";
@@ -172,26 +190,20 @@ int activate_windows(int id, string win, int count) {
 	}
 }
 
-int download_and_install(bool isclear, bool iscontinue, string projectname, string link, string filename, string exec) {
-	if (check_exist(PATH_str + "\\tools\\wget.exe") != 0) {
-		cout << "wget not found";
+bool download_and_install(bool isclear, bool iscontinue, string projectname, string link, string filename, string exec) {
+	if (isclear == 0) {
+		clear();
+		clear_tmp();
+	}
+	cout << "\n Downloading " << projectname << "...\n";
+	download_file(link, filename);
+	cout << "\n Installing " << projectname << "... ";
+	bool return_code = exec_file(exec);
+	printf("Done\n");
+	if (iscontinue != 0) {
 		pause_on_exit();
 	}
-	else {
-		if (isclear == 0) {
-			clear();
-			clear_tmp();
-		}
-		cout << "\n Downloading " << projectname << "...\n";
-		download_file(link, filename);
-		cout << "\n Installing " << projectname << "... ";
-		bool return_code = exec_file(exec);
-		printf("Done\n");
-		if (iscontinue != 0) {
-			pause_on_exit();
-		}
-		return return_code;
-	}
+	return return_code;
 }
 
 int main(){
@@ -324,10 +336,12 @@ main_menu:
 activate_win:
 	clear();
 	khanh_main();
-	cout << "\n 1. Windows 7\n 2. Windows 8\n 3. Windows 8.1\n 4. Windows 10/11\n 0. Back\n\n Your choose: ";
+	cout << "\n 1. Check Activate\n 2. Windows 7\n 3. Windows 8\n 4. Windows 8.1\n 5. Windows 10/11\n 0. Back\n\n Your choose: ";
 	cin >> khanh;
 	switch (khanh) {
 	case 1:
+		check_activate();
+	case 2:
 		clear();
 		khanh_main();
 		cout << "\n 1. Windows 7 Professional\n 2. Windows 7 Professional N\n 3. Windows 7 Professional E\n 4. Windows 7 Enterprise\n 5. Windows 7 Enterprise N\n 6. Windows 7 Enterprise E\n 0. Back\n\n Your choose: ";
@@ -353,7 +367,7 @@ activate_win:
 			goto activate_win;
 		}
 		goto activate_win;
-	case 2:
+	case 3:
 		clear();
 		khanh_main();
 		cout << "\n 1. Windows 8 Professional\n 2. Windows 8 Professional N\n 3. Windows 8 Enterprise\n 4. Windows 8 Enterprise N\n 0. Back\n\n Your choose: ";
@@ -373,7 +387,7 @@ activate_win:
 			goto activate_win;
 		}
 		goto activate_win;
-	case 3:
+	case 4:
 		clear();
 		khanh_main();
 		cout << "\n 1. Windows 8.1 Professional\n 2. Windows 8.1 Professional N\n 3. Windows 8.1 Enterprise\n 4. Windows 8.1 Enterprise N\n 0. Back\n\n Your choose: ";
@@ -393,7 +407,7 @@ activate_win:
 			goto activate_win;
 		}
 		goto activate_win;
-	case 4:
+	case 5:
 		clear();
 		khanh_main();
 		cout << "\n 1. Windows 10 Professional\n 2. Windows 10 Professional N\n 3. Windows 10 Enterprise\n 4. Windows 10 Enterprise N\n 5. Windows 10 Education\n 6. Windows 10 Education N\n 7. Windows 10 Enterprise 2015 LTSB\n 8. Windows 10 Enterprise 2015 LTSB N\n 9. Windows 10 Enterprise 2016 LTSB\n 10. Windows 10 Enterprise 2016 LTSB N\n 11. Windows 10 Professional Workstation\n 12. Windows 10 Professional Workstation N\n 0. Back\n\n Your choose: ";
@@ -519,6 +533,16 @@ void install_vcredist() {
 	cout << "============\n Install completed!";
 	clear_tmp();
 	pause_on_exit();
+}
+
+void check_activate()
+{
+	{
+		clear();
+		cout << "\n Checking activate...\n\n";
+		exec(slmgr + " /xpr");
+		pause_on_exit();
+	}
 }
 
 void pause_on_continue()
