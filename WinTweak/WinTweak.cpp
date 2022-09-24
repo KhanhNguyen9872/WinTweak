@@ -67,9 +67,18 @@ bool exec(string command) {
 	}
 }
 
-string exec_output(string command) {
+string exec_output(string command, short output_type) {
 	{
-		exec(command + " > " + PATH_str + "\\tmp\\tmp.output 2>&1");
+		string output;
+		if (output_type == 0) {
+			output = " > " + PATH_str + "\\tmp\\tmp.output 2>&1";
+		} else if (output_type == 1) {
+			output = " > " + PATH_str + "\\tmp\\tmp.output 2> NUL";
+		}
+		else if (output_type == 2) {
+			output = " 2> " + PATH_str + "\\tmp\\tmp.output > NUL";
+		}
+		exec(command + output);
 		string output_str = read_file(PATH_str + "\\tmp\\tmp.output");
 		return output_str;
 	}
