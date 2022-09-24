@@ -70,6 +70,7 @@ bool exec(string command) {
 string exec_output(string command, short output_type) {
 	{
 		string output;
+		// 0 = all output; 1 = output normal; 2 = output error;
 		if (output_type == 0) {
 			output = " > " + PATH_str + "\\tmp\\tmp.output 2>&1";
 		} else if (output_type == 1) {
@@ -80,6 +81,7 @@ string exec_output(string command, short output_type) {
 		}
 		exec(command + output);
 		string output_str = read_file(PATH_str + "\\tmp\\tmp.output");
+		exec("del /f " + PATH_str + "\\tmp\\tmp.output > NUL 2>&1");
 		return output_str;
 	}
 }
@@ -87,8 +89,7 @@ string exec_output(string command, short output_type) {
 bool exec_file(string filename) {
     {
 		string PATH_temp = "cd " + PATH_str + "\\tmp && " + filename;
-		strcpy_s(PATH_EXEC, PATH_temp.c_str());
-		bool return_code = system(PATH_EXEC);
+		bool return_code = exec(PATH_temp);
 		return return_code;
 	}
 }
@@ -113,11 +114,8 @@ bool download_file(string link, string filename) {
 			cout << "wget or library not found";
 			pause_on_exit();
 			return 1;
-		}
-		else {
-			string PATH_temp = "cd " + PATH_str + "\\tmp && .\\..\\tools\\wget.exe --no-check-certificate -q --show-progress -O " + filename + " " + link;
-			strcpy_s(PATH_EXEC, PATH_temp.c_str());
-			bool return_code = system(PATH_EXEC);
+		} else {
+			bool return_code = exec("cd " + PATH_str + "\\tmp && .\\..\\tools\\wget.exe --no-check-certificate -q --show-progress -O " + filename + " " + link);
 			return return_code;
 		}
 	}
@@ -350,6 +348,7 @@ activate_win:
 	switch (khanh) {
 	case 1:
 		check_activate();
+		goto activate_win;
 	case 2:
 		clear();
 		khanh_main();
@@ -511,16 +510,8 @@ void pause_on_exit()
 }
 
 void clear_tmp() {
-	{
-	    string PATH_temp = "rmdir /q /s " + PATH_str + "\\tmp > NUL 2>&1";
-		strcpy_s(PATH_EXEC, PATH_temp.c_str());
-		system(PATH_EXEC);
-	}
-	{
-		string PATH_temp = "mkdir " + PATH_str + "\\tmp > NUL 2>&1";
-		strcpy_s(PATH_EXEC, PATH_temp.c_str());
-		system(PATH_EXEC);
-	}
+	exec("rmdir /q /s " + PATH_str + "\\tmp > NUL 2>&1");
+	exec("mkdir " + PATH_str + "\\tmp > NUL 2>&1");
 }
 
 void khanh_main() {
