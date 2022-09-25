@@ -389,8 +389,10 @@ main_menu:
 	switch (khanh) {
 		case 1:
 			system_info();
+			goto main_menu;
 		case 2:
 			clearTrash();
+			goto main_menu;
 		case 3:
 			if (network == 1) {
 				goto activate_win;
