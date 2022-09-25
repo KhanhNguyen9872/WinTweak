@@ -35,9 +35,7 @@ std::wstring ExePath() {
 
 map<short, string> lib;
 map<string, string> windows;
-map<short, string> kms7;
-map<short, string> kms8;
-map<short, string> kms10;
+map<short, string> kms;
 
 struct stat info;
 
@@ -149,7 +147,7 @@ bool active_windows(string key, string kms) {
 	exec(slmgr + " /ipk " + key + " > NUL 2>&1");
 	exec(slmgr + " /skms " + kms + " > NUL 2>&1");
 	{
-		return exec(slmgr + " /ato");
+		return exec(slmgr + " /ato |findstr \"successfully\" >nul");
 	}
 }
 
@@ -231,70 +229,48 @@ windows:
 	windows["win10enter2016ltsbN"] = "QFFDN-GRT3P-VKWWX-X7T3R-8B639";
 	windows["win10prowork"] = "NRG8B-VKK3Q-CXVCJ-9G2XF-6Q84J";
 	windows["win10proworkN"] = "9FNHH-K3HBT-3W4TD-6383H-6XYWF";
-kms7:
-	kms7[1] = "tinhve.vn";
-	kms7[2] = "s8.now.im";
-	kms7[3] = "s9.now.im";
-kms8:
-	kms8[1] = "kms8.MSGuides.com";
-	kms8[2] = "kms9.MSGuides.com";
-	kms8[3] = "kms.digiboy.ir";
-kms10:
-	kms10[1] = "kms8.MSGuides.com";
-	kms10[2] = "kms9.MSGuides.com";
-	kms10[3] = "kms.digiboy.ir";
+kms:
+	kms[1] = "kms8.MSGuides.com";
+	kms[2] = "noip.me";
+	kms[3] = "s8.now.im";
+	kms[4] = "s9.now.im";
+	kms[5] = "kms9.MSGuides.com";
+	kms[6] = "kms.digiboy.ir";
+	kms[7] = "kms.ddns.net";
+	kms[8] = "kms.cnlic.com";
+	kms[9] = "kms.shuax.com";
 	{
 		string khanh;
 		cout << "\n\nDo you want to activate it? [Y/N]: ";
 		cin >> khanh;
 		if (khanh == "Y" || khanh == "y") {
 			clear();
-			cout << "Test KMS Server...\n";
-			string a; int b;
-			if (id == 7) {
-				b = kms7.size() + 1;
-			}
-			else if (id == 8) {
-				b = kms8.size() + 1;
-			}
-			else if (id == 10) {
-				b = kms10.size() + 1;
-			}
+			string a;
+			int b = kms.size() + 1;
+			clear();
+			bool return_code = 1;
 			for (int i = 1; i < b; i++) {
-				if (id == 7) {
-					a = kms7[i];
+				if (test_ping(kms[i]) == 0) {
+					if (active_windows(windows[win], kms[i]) == 0) {
+						return_code = 0;
+						break;
+					}
+					else {
+						cout << "- KMS: " << kms[i] << " failed!\n";
+					}
 				}
-				else if (id == 8) {
-					a = kms8[i];
-				}
-				else if (id == 10) {
-					a = kms10[i];
-				}
-				if (test_ping(a) == 0) {
-					count = i;
-					break;
+				else {
+					cout << "- KMS: " << kms[i] << " timeout!\n";
 				}
 			}
-			if (count == 0) {
-				cout << "All server KMS is die!\n";
-				pause_on_exit();
-				return 1;
+			if (return_code == 0) {
+				cout << "\nWindows is activated!\n";
 			}
 			else {
-				clear();
-				bool return_code;
-				if (id == 7) {
-					return_code = active_windows(windows[win], kms7[count]);
-				}
-				else if (id == 8) {
-					return_code = active_windows(windows[win], kms8[count]);
-				}
-				else if (id == 10) {
-					return_code = active_windows(windows[win], kms10[count]);
-				}
-				pause_on_exit();
-				return return_code;
+				cout << "\nFailed to activate Windows!\n";
 			}
+			pause_on_exit();
+			return return_code;
 		}
 	}
 }
