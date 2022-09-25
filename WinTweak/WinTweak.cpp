@@ -33,10 +33,11 @@ std::wstring ExePath() {
 	return std::wstring(buffer).substr(0, pos);
 }
 
+map<short, string> lib;
 map<string, string> windows;
-map<int, string> kms7;
-map<int, string> kms8;
-map<int, string> kms10;
+map<short, string> kms7;
+map<short, string> kms8;
+map<short, string> kms10;
 
 struct stat info;
 
@@ -62,8 +63,7 @@ bool exec(string command) {
 	{
 		string PATH_temp = command;
 		strcpy_s(PATH_EXEC, PATH_temp.c_str());
-		bool return_code = system(PATH_EXEC);
-		return return_code;
+		return system(PATH_EXEC);
 	}
 }
 
@@ -86,11 +86,11 @@ string exec_output(string command, short output_type) {
 	}
 }
 
+
 bool exec_file(string filename) {
     {
 		string PATH_temp = "cd " + PATH_str + "\\tmp && " + filename;
-		bool return_code = exec(PATH_temp);
-		return return_code;
+		return exec(PATH_temp);
 	}
 }
 
@@ -103,21 +103,42 @@ bool check_exist(string pathf) {
 	{
 		string PATH_temp = pathf;
 		strcpy_s(PATH_EXEC, PATH_temp.c_str());
-		bool isfile = stat(PATH_EXEC, &info);
-		return isfile;
+		return stat(PATH_EXEC, &info);
+	}
+}
+
+bool check_library() {
+library:
+	lib[1] = "\\tools";
+	lib[2] = "\\tools\\awk.exe";
+	lib[3] = "\\tools\\curl.exe";
+	lib[4] = "\\tools\\curl-ca-bundle.crt";
+	lib[5] = "\\tools\\grep.exe";
+	lib[6] = "\\tools\\libcurl.dll";
+	lib[7] = "\\tools\\libeay32.dll";
+	lib[8] = "\\tools\\libiconv2.dll";
+	lib[9] = "\\tools\\libintl3.dll";
+	lib[10] = "\\tools\\libssl32.dll";
+	lib[11] = "\\tools\\pcre3.dll";
+	lib[12] = "\\tools\\regex2.dll";
+	lib[13] = "\\tools\\sed.exe";
+	lib[14] = "\\tools\\wget.exe";
+	{
+		short b = lib.size() + 1;
+		for (int i = 1; i < b; i++) {
+			if (check_exist(PATH_str + lib[i]) != 0) {
+				cout << "\nsome library is missing! [" << lib[i] << "]\n";
+				pause_on_exit();
+				exit(1);
+			}
+		}
 	}
 }
 
 bool download_file(string link, string filename) {
 	{
-		if (check_exist(PATH_str + "\\tools\\wget.exe") != 0 || check_exist(PATH_str + "\\tools\\libeay32.dll") != 0 || check_exist(PATH_str + "\\tools\\libiconv2.dll") != 0 || check_exist(PATH_str + "\\tools\\libintl3.dll") != 0 || check_exist(PATH_str + "\\tools\\libssl32.dll") != 0) {
-			cout << "wget or library not found";
-			pause_on_exit();
-			return 1;
-		} else {
-			bool return_code = exec("cd " + PATH_str + "\\tmp && .\\..\\tools\\wget.exe --no-check-certificate -q --show-progress -O " + filename + " " + link);
-			return return_code;
-		}
+		check_library();
+		return exec("cd " + PATH_str + "\\tmp && .\\..\\tools\\wget.exe --no-check-certificate -q --show-progress -O " + filename + " " + link);
 	}
 }
 
@@ -128,19 +149,100 @@ bool active_windows(string key, string kms) {
 	exec(slmgr + " /ipk " + key + " > NUL 2>&1");
 	exec(slmgr + " /skms " + kms + " > NUL 2>&1");
 	{
-		bool return_code = exec(slmgr + " /ato");
-		return return_code;
+		return exec(slmgr + " /ato");
 	}
 }
 
 bool test_ping(string link) {
 	{
-		bool return_code = exec("ping -n 1 " + link + " > NUL 2>&1");
-		return return_code;
+		return exec("ping -n 1 " + link + " > NUL 2>&1");
 	}
 }
 
 bool activate_windows(int id, string win, int count) {
+windows:
+	//win7
+	windows["win7pro"] = "FJ82H-XT6CR-J8D7P-XQJJ2-GPDD4";
+	windows["win7proN"] = "MRPKT-YTG23-K7D7T-X2JMM-QY7MG";
+	windows["win7proE"] = "W82YF-2Q76Y-63HXB-FGJG9-GF7QX";
+	windows["win7ul"] = "RHTBY-VWY6D-QJRJ9-JGQ3X-Q2289";
+	windows["win7embeddedpos7"] = "YBYF6-BHCR3-JPKRB-CDW7B-F9BK4";
+	windows["win7embeddedstd"] = "XGY72-BRBBT-FF8MH-2GG8H-W7KCW";
+	windows["win7embeddedthinpc"] = "73KQT-CD9G6-K7TQG-66MRP-CQ22C";
+	windows["win7enter"] = "33PXH-7Y6KF-2VJC9-XBBR8-HVTHH";
+	windows["win7enterN"] = "YDRBP-3D83W-TY26F-D46B2-XCKRJ";
+	windows["win7enterE"] = "C29WB-22CC8-VJ326-GHFJW-H9DH4";
+	//win8
+	windows["win8core"] = "BN3D2-R7TKB-3YPBD-8DRP2-27GG4";
+	windows["win8coreN"] = "8N2M2-HWPGY-7PGT9-HGDD8-GVGGY";
+	windows["win8coresingle"] = "2WN2H-YGCQR-KFX6K-CD6TF-84YXQ";
+	windows["win8corechina"] = "4K36P-JN4VD-GDC6V-KDT89-DYFKP";
+	windows["win8corearm"] = "DXHJF-N9KQX-MFPVR-GHGQK-Y7RKV";
+	windows["win8promedia"] = "GNBB8-YVD74-QJHX6-27H4K-8QHDG";
+	windows["win8embeddedpro"] = "RYXVT-BNQG7-VD29F-DBMRY-HT73M";
+	windows["win8embeddedenter"] = "NKB3R-R2F8T-3XCDP-7Q2KW-XWYQ2";
+	windows["win8pro"] = "NG4HW-VH26C-733KW-K6F98-J8CK4";
+	windows["win8proN"] = "XCVCF-2NXM9-723PB-MHCB7-2RYQQ";
+	windows["win8enter"] = "32JNW-9KQ84-P47T8-D8GGY-CWCK7";
+	windows["win8enterN"] = "JMNMF-RHW7P-DMY6X-RF3DR-X2BQT";
+	//win8.1
+	windows["win81core"] = "M9Q9P-WNJJT-6PXPY-DWX8H-6XWKK";
+	windows["win81coreN"] = "7B9N3-D94CG-YTVHR-QBPX3-RJP64";
+	windows["win81coresingle"] = "BB6NG-PQ82V-VRDPW-8XVD2-V8P66";
+	windows["win81corechina"] = "NCTT7-2RGK8-WMHRF-RY7YQ-JTXG3";
+	windows["win81corearm"] = "XYTND-K6QKT-K2MRH-66RTM-43JKP";
+	windows["win81promedia"] = "789NJ-TQK6T-6XTH8-J39CJ-J8D3P";
+	windows["win81embeddedpro"] = "NMMPB-38DD4-R2823-62W8D-VXKJB";
+	windows["win81embeddedenter"] = "FNFKF-PWTVT-9RC8H-32HB2-JB34X";
+	windows["win81embeddedauto"] = "VHXM3-NR6FT-RY6RT-CK882-KW2CJ";
+	windows["win81bing"] = "3PY8R-QHNP9-W7XQD-G6DPH-3J2C9";
+	windows["win81bingN"] = "Q6HTR-N24GM-PMJFP-69CD8-2GXKR";
+	windows["win81bingsingle"] = "KF37N-VDV38-GRRTV-XH8X6-6F3BB";
+	windows["win81bingchina"] = "R962J-37N87-9VVK2-WJ74P-XTMHR";
+	windows["win81prostudent"] = "MX3RK-9HNGX-K3QKC-6PJ3F-W8D7B";
+	windows["win81prostudentN"] = "TNFGH-2R6PB-8XM3K-QYHX2-J4296";
+	windows["win81pro"] = "GCRJD-8NW9H-F2CDX-CCM8D-9D6T9";
+	windows["win81proN"] = "HMCNV-VVBFX-7HMBH-CTY9B-B4FXY";
+	windows["win81enter"] = "MHF9N-XY6XB-WVXMC-BTDCT-MKKG7";
+	windows["win81enterN"] = "TT4HM-HN7YT-62K67-RGRQJ-JFFXW";
+	//win10
+	windows["win10home"] = "TX9XD-98N7V-6WMQ6-BX7FG-H8Q99";
+	windows["win10homeN"] = "3KHY7-WNT83-DGQKR-F7HPR-844BM";
+	windows["win10homesingle"] = "7HNRX-D7KGG-3K4RQ-4WPJ4-YTDFH";
+	windows["win10homechina"] = "PVMJN-6DFY6-9CCP6-7BKTT-D3WVR";
+	windows["win10proedu"] = "6TP4R-GNPTD-KYYHQ-7B7DP-J447Y";
+	windows["win10proeduN"] = "YVWGF-BXNMC-HTQYQ-CPQ99-66QFC";
+	windows["win10enterltsc2019"] = "M7XTQ-FN8P6-TTKYV-9D4CC-J462D";
+	windows["win10enterltsc2019N"] = "92NFX-8DJQP-P6BBQ-THF9C-7CG2H";
+	windows["win10enterremoteserver"] = "7NBT4-WGBQX-MP4H7-QXFF8-YP3KX";
+	windows["win10enterremotesession"] = "CPWHC-NT2C7-VYW78-DHDB2-PG3GK";
+	windows["win10lean"] = "NBTWJ-3DR69-3C4V8-C26MC-GQ9M6";
+	windows["win10pro"] = "W269N-WFGWX-YVC9B-4J6C9-T83GX";
+	windows["win10proN"] = "MH37W-N47XK-V7XM9-C7227-GCQG9";
+	windows["win10enter"] = "NPPR9-FWDCX-D2C8J-H872K-2YT43";
+	windows["win10enterN"] = "DPH2V-TTNVB-4X9Q3-TJR4H-KHJW4";
+	windows["win10enterG"] = "YYVX9-NTFWV-6MDM3-9PT4T-4M68B";
+	windows["win10enterGN"] = "44RPN-FTY23-9VTTB-MP9BX-T84FV";
+	windows["win10edu"] = "NW6C2-QMPVW-D7KKK-3GKT6-VCFB2";
+	windows["win10eduN"] = "2WH4N-8QGBV-H22JP-CT43Q-MDWWJ";
+	windows["win10enter2015ltsb"] = "WNMTR-4C88C-JK8YV-HQ7T2-76DF9";
+	windows["win10enter2015ltsbN"] = "2F77B-TNFGY-69QQF-B8YKP-D69TJ";
+	windows["win10enter2016ltsb"] = "DCPHK-NFMTC-H88MJ-PFHPY-QJ4BJ";
+	windows["win10enter2016ltsbN"] = "QFFDN-GRT3P-VKWWX-X7T3R-8B639";
+	windows["win10prowork"] = "NRG8B-VKK3Q-CXVCJ-9G2XF-6Q84J";
+	windows["win10proworkN"] = "9FNHH-K3HBT-3W4TD-6383H-6XYWF";
+kms7:
+	kms7[1] = "tinhve.vn";
+	kms7[2] = "s8.now.im";
+	kms7[3] = "s9.now.im";
+kms8:
+	kms8[1] = "kms8.MSGuides.com";
+	kms8[2] = "kms9.MSGuides.com";
+	kms8[3] = "kms.digiboy.ir";
+kms10:
+	kms10[1] = "kms8.MSGuides.com";
+	kms10[2] = "kms9.MSGuides.com";
+	kms10[3] = "kms.digiboy.ir";
 	{
 		string khanh;
 		cout << "\n\nDo you want to activate it? [Y/N]: ";
@@ -229,31 +331,25 @@ BOOL if_admin() {
 	return fRet;
 }
 
-bool main(){
+short main(){
 first:
 	set_console_size();
 	if (!if_admin()) {
-		cout << "You need run as administrator!\n";
+		cout << "\nYou need run as administrator!\n";
 		pause_on_exit();
 		exit(1);
-	}
-	if (!IsWindows7OrGreater())
+	} else if (!IsWindows7OrGreater())
 	{
-		cout << "You need at least Windows 7 or later\n";
+		cout << "\nYou need at least Windows 7 or later\n";
 		pause_on_exit();
 		exit(1);
-	}
-	if (IsWindowsServer())
+	} else if (IsWindowsServer())
 	{
-		printf("You are running this application on Windows Server!\nRecommend not to run this app\n");
+		printf("\nYou are running this application on Windows Server!\nRecommend not to run this app\n");
 		pause_on_continue();
 	}
 
-	if (check_exist(PATH_str + "\\tools") != 0) {
-		cout << "Tools folder is missing!\n";
-		pause_on_exit();
-		exit(1);
-	}
+	check_library();
 
 	if (PATH_str.length() > 128) {
 		cout << "PATH directory to long [" << PATH_str.length() << "]!\nPlease change to another short PATH!\n Required: 128 or below!\n";
@@ -263,91 +359,9 @@ first:
 	else {
 		strcpy_s(PATH, PATH_str.c_str());
 	}
-windows:
-	//win7
-	windows["win7pro"] = "FJ82H-XT6CR-J8D7P-XQJJ2-GPDD4";
-	windows["win7proN"] = "MRPKT-YTG23-K7D7T-X2JMM-QY7MG";
-	windows["win7proE"] = "W82YF-2Q76Y-63HXB-FGJG9-GF7QX";
-	windows["win7ul"] = "RHTBY-VWY6D-QJRJ9-JGQ3X-Q2289";
-	windows["win7embeddedpos7"] = "YBYF6-BHCR3-JPKRB-CDW7B-F9BK4";
-	windows["win7embeddedstd"] = "XGY72-BRBBT-FF8MH-2GG8H-W7KCW";
-	windows["win7embeddedthinpc"] = "73KQT-CD9G6-K7TQG-66MRP-CQ22C";
-	windows["win7enter"] = "33PXH-7Y6KF-2VJC9-XBBR8-HVTHH";
-	windows["win7enterN"] = "YDRBP-3D83W-TY26F-D46B2-XCKRJ";
-	windows["win7enterE"] = "C29WB-22CC8-VJ326-GHFJW-H9DH4";
-	//win8
-	windows["win8core"] = "BN3D2-R7TKB-3YPBD-8DRP2-27GG4";
-	windows["win8coreN"] = "8N2M2-HWPGY-7PGT9-HGDD8-GVGGY";
-	windows["win8coresingle"] = "2WN2H-YGCQR-KFX6K-CD6TF-84YXQ";
-	windows["win8corechina"] = "4K36P-JN4VD-GDC6V-KDT89-DYFKP";
-	windows["win8corearm"] = "DXHJF-N9KQX-MFPVR-GHGQK-Y7RKV";
-	windows["win8promedia"] = "GNBB8-YVD74-QJHX6-27H4K-8QHDG";
-	windows["win8embeddedpro"] = "RYXVT-BNQG7-VD29F-DBMRY-HT73M";
-	windows["win8embeddedenter"] = "NKB3R-R2F8T-3XCDP-7Q2KW-XWYQ2";
-	windows["win8pro"] = "NG4HW-VH26C-733KW-K6F98-J8CK4";
-	windows["win8proN"] = "XCVCF-2NXM9-723PB-MHCB7-2RYQQ";
-	windows["win8enter"] = "32JNW-9KQ84-P47T8-D8GGY-CWCK7";
-	windows["win8enterN"] = "JMNMF-RHW7P-DMY6X-RF3DR-X2BQT";
-	//win8.1
-	windows["win81core"] = "M9Q9P-WNJJT-6PXPY-DWX8H-6XWKK";
-	windows["win81coreN"] = "7B9N3-D94CG-YTVHR-QBPX3-RJP64";
-	windows["win81coresingle"] = "BB6NG-PQ82V-VRDPW-8XVD2-V8P66";
-	windows["win81corechina"] = "NCTT7-2RGK8-WMHRF-RY7YQ-JTXG3";
-	windows["win81corearm"] = "XYTND-K6QKT-K2MRH-66RTM-43JKP";
-	windows["win81promedia"] = "789NJ-TQK6T-6XTH8-J39CJ-J8D3P";
-	windows["win81embeddedpro"] = "NMMPB-38DD4-R2823-62W8D-VXKJB";
-	windows["win81embeddedenter"] = "FNFKF-PWTVT-9RC8H-32HB2-JB34X";
-	windows["win81embeddedauto"] = "VHXM3-NR6FT-RY6RT-CK882-KW2CJ";
-	windows["win81bing"] = "3PY8R-QHNP9-W7XQD-G6DPH-3J2C9";
-	windows["win81bingN"] = "Q6HTR-N24GM-PMJFP-69CD8-2GXKR";
-	windows["win81bingsingle"] = "KF37N-VDV38-GRRTV-XH8X6-6F3BB";
-	windows["win81bingchina"] = "R962J-37N87-9VVK2-WJ74P-XTMHR";
-	windows["win81prostudent"] = "MX3RK-9HNGX-K3QKC-6PJ3F-W8D7B";
-	windows["win81prostudentN"] = "TNFGH-2R6PB-8XM3K-QYHX2-J4296";
-	windows["win81pro"] = "GCRJD-8NW9H-F2CDX-CCM8D-9D6T9";
-	windows["win81proN"] = "HMCNV-VVBFX-7HMBH-CTY9B-B4FXY";
-	windows["win81enter"] = "MHF9N-XY6XB-WVXMC-BTDCT-MKKG7";
-	windows["win81enterN"] = "TT4HM-HN7YT-62K67-RGRQJ-JFFXW";
-	//win10
-	windows["win10home"] = "TX9XD-98N7V-6WMQ6-BX7FG-H8Q99";
-	windows["win10homeN"] = "3KHY7-WNT83-DGQKR-F7HPR-844BM";
-	windows["win10homesingle"] = "7HNRX-D7KGG-3K4RQ-4WPJ4-YTDFH";
-	windows["win10homechina"] = "PVMJN-6DFY6-9CCP6-7BKTT-D3WVR";
-	windows["win10proedu"] = "6TP4R-GNPTD-KYYHQ-7B7DP-J447Y";
-	windows["win10proeduN"] = "YVWGF-BXNMC-HTQYQ-CPQ99-66QFC";
-	windows["win10enterltsc2019"] = "M7XTQ-FN8P6-TTKYV-9D4CC-J462D";
-	windows["win10enterltsc2019N"] = "92NFX-8DJQP-P6BBQ-THF9C-7CG2H";
-	windows["win10enterremoteserver"] = "7NBT4-WGBQX-MP4H7-QXFF8-YP3KX";
-	windows["win10enterremotesession"] = "CPWHC-NT2C7-VYW78-DHDB2-PG3GK";
-	windows["win10lean"] = "NBTWJ-3DR69-3C4V8-C26MC-GQ9M6";
-	windows["win10pro"] = "W269N-WFGWX-YVC9B-4J6C9-T83GX";
-	windows["win10proN"] = "MH37W-N47XK-V7XM9-C7227-GCQG9";
-	windows["win10enter"] = "NPPR9-FWDCX-D2C8J-H872K-2YT43";
-	windows["win10enterN"] = "DPH2V-TTNVB-4X9Q3-TJR4H-KHJW4";
-	windows["win10enterG"] = "YYVX9-NTFWV-6MDM3-9PT4T-4M68B";
-	windows["win10enterGN"] = "44RPN-FTY23-9VTTB-MP9BX-T84FV";
-	windows["win10edu"] = "NW6C2-QMPVW-D7KKK-3GKT6-VCFB2";
-	windows["win10eduN"] = "2WH4N-8QGBV-H22JP-CT43Q-MDWWJ";
-	windows["win10enter2015ltsb"] = "WNMTR-4C88C-JK8YV-HQ7T2-76DF9";
-	windows["win10enter2015ltsbN"] = "2F77B-TNFGY-69QQF-B8YKP-D69TJ";
-	windows["win10enter2016ltsb"] = "DCPHK-NFMTC-H88MJ-PFHPY-QJ4BJ";
-	windows["win10enter2016ltsbN"] = "QFFDN-GRT3P-VKWWX-X7T3R-8B639";
-	windows["win10prowork"] = "NRG8B-VKK3Q-CXVCJ-9G2XF-6Q84J";
-	windows["win10proworkN"] = "9FNHH-K3HBT-3W4TD-6383H-6XYWF";
-kms7:
-	kms7[1] = "tinhve.vn";
-	kms7[2] = "s8.now.im";
-	kms7[3] = "s9.now.im";
-kms8:
-	kms8[1] = "kms8.MSGuides.com";
-	kms8[2] = "kms9.MSGuides.com";
-	kms8[3] = "kms.digiboy.ir";
-kms10:
-	kms10[1] = "kms8.MSGuides.com";
-	kms10[2] = "kms9.MSGuides.com";
-	kms10[3] = "kms.digiboy.ir";
+
 check:
-	cout << "Testing internet....\n";
+	cout << "\nTesting internet....\n";
 	if (test_ping("google.com") == 0) {
 		network = 1;
 		test1 = "Yes";
@@ -813,7 +827,7 @@ void clearTrash()
 {
 	clear();
     string khanh;
-    cout << "This process will clear all temp folder!\nDo you want to continue? [Y/N]: ";
+    cout << "\nThis process will clear all temp folder!\nDo you want to continue? [Y/N]: ";
     cin >> khanh;
     if (khanh == "Y" || khanh == "y") {
     	system("rmdir /q /s %temp% > NUl 2>&1");
