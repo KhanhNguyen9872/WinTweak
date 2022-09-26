@@ -121,6 +121,8 @@ library:
 	lib[12] = "\\tools\\regex2.dll";
 	lib[13] = "\\tools\\sed.exe";
 	lib[14] = "\\tools\\wget.exe";
+	lib[15] = "\\msvcp140.dll";
+	lib[16] = "\\vcruntime140.dll";
 	{
 		short b = lib.size() + 1;
 		for (int i = 1; i < b; i++) {
@@ -345,15 +347,19 @@ check:
 		network = 0;
 		test1 = "No";
 	}
+
 	if (is64 == 0) {
 		if (isarm64 == 0) {
 			arch = "ARM64";
-		} else {
-	    	arch = "x86_64";
 		}
-	} else {
-	    arch = "x86";
+		else {
+			arch = "x86_64";
+		}
 	}
+	else {
+		arch = "x86";
+	}
+
     clear_tmp();
 main_menu:
 	clear();
